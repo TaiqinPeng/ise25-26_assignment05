@@ -11,3 +11,11 @@ Feature: Points of Sale Management
     Then the POS list should contain the same elements in the same order
 
 # TODO: Add new scenario "Update one of three existing POS"
+  Scenario: Update one of three existing POS
+    Given the following POS exist:
+      | name          | description             | type            | campus    | street        | houseNumber | postalCode | city        |
+      | Schmelzpunkt  | Old description 1       | CAFE            | ALTSTADT  | Hauptstraße   | 90          | 69117      | Heidelberg  |
+      | Bäcker Görtz  | Old description 2       | BAKERY          | INF       | Berliner Str. | 43          | 69120      | Heidelberg  |
+      | New Vending Machine | Old description 3 | VENDING_MACHINE | BERGHEIM  | Teststraße    | 99a         | 12345      | Other City  |
+    When I update the description of POS "Schmelzpunkt" to "New updated description"
+    Then the POS "Schmelzpunkt" should have description "New updated description"

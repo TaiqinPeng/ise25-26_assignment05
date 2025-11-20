@@ -92,6 +92,12 @@ public class CucumberPosSteps {
     }
 
     // TODO: Add Given step for new scenario
+    @Given("the following POS exist:")
+    public void theFollowingPosExist(List<PosDto> posList) {
+        // Use the DataTable mapping to convert rows into PosDto objects
+        // and store them as the current POS list for this scenario
+        createdPosList = new java.util.ArrayList<>(posList);
+    }
 
     // When -----------------------------------------------------------------------
 
@@ -102,6 +108,36 @@ public class CucumberPosSteps {
     }
 
     // TODO: Add When step for new scenario
+    @When("I update the description of POS {string} to {string}")
+    public void iUpdateTheDescriptionOfPosTo(String name, String newDescription) {
+        // Find the POS with the given name and replace it with an updated copy
+        for (int i = 0; i < createdPosList.size(); i++) {
+            PosDto current = createdPosList.get(i);
+
+            if (current.name().equals(name)) {
+                PosDto updated = PosDto.builder()
+                        .id(current.id())
+                        .name(current.name())
+                        .description(newDescription) // updated field
+                        .type(current.type())
+                        .campus(current.campus())
+                        .street(current.street())
+                        .houseNumber(current.houseNumber())
+                        .postalCode(current.postalCode())
+                        .city(current.city())
+                        .build();
+
+                createdPosList.set(i, updated); // replace in the list
+                updatedPos = updated;
+                return;
+            }
+        }
+
+        // Fail the scenario if no POS with the given name exists
+        throw new IllegalStateException(
+                "POS with name '" + name + "' not found in createdPosList"
+        );
+    }
 
     // Then -----------------------------------------------------------------------
 
@@ -114,4 +150,19 @@ public class CucumberPosSteps {
     }
 
     // TODO: Add Then step for new scenario
+    @Then("the POS {string} should have description {string}")
+    public void thePosShouldHaveDescription(String name, String expectedDescription) {
+        // Search the current POS list for a POS with the given name
+        PosDto found = createdPosList.stream()
+                .filter(pos -> pos.name().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "POS with name '" + name + "' not found in createdPosList"
+                ));
+
+        // Verify that the description was updated correctly
+        org.assertj.core.api.Assertions.assertThat(found.description())
+                .isEqualTo(expectedDescription);
+    }
+
 }
